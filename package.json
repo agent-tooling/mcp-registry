@@ -1,0 +1,29 @@
+{
+  "name": "mcp-registry",
+  "module": "src/server.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/server.ts --target bun --outfile dist/server.js",
+    "dev": "bun run src/server.ts",
+    "fmt": "prettier -w .",
+    "fmt:check": "prettier -c .",
+    "start": "bun dist/server.js",
+    "env:validate": "bunx better-env validate --environment development",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "precommit:check": "bun run typecheck && bun run test && bun run fmt:check"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.5.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "better-env": "^0.3.1",
+    "hono": "^4.12.8",
+    "zod": "^4.3.6"
+  }
+}

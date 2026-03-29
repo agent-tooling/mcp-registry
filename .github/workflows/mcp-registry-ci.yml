@@ -1,0 +1,41 @@
+name: mcp-registry CI
+
+on:
+  pull_request:
+    paths:
+      - "**"
+      - ".github/workflows/mcp-registry-ci.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**"
+      - ".github/workflows/mcp-registry-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format check
+        run: bun run fmt:check
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build
