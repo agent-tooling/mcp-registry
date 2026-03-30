@@ -1,10 +1,12 @@
 import path from "node:path";
 
+import { track } from "@vercel/analytics/server";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, openAPIRouteHandler, resolver } from "hono-openapi";
 import { z } from "zod";
 
+import { analyticsConfig } from "./analytics/config";
 import { loadRegistryFromFile } from "./load-registry";
 import { queryServers } from "./query-servers";
 import { listResponseSchema, type ServerEntry } from "./schema";
@@ -32,6 +34,17 @@ async function getRegistryEntries(): Promise<ServerEntry[]> {
 }
 
 export const apiApp = new Hono().basePath("/api");
+
+apiApp.use(async (c, next) => {
+  await next();
+  if (!analyticsConfig.isEnabled) return;
+  track("api_request", {
+    path: c.req.path,
+    method: c.req.method,
+    status: c.res.status,
+    search: c.req.query("search") ?? "",
+  }).catch(() => {});
+});
 
 apiApp.get(
   "/health",
