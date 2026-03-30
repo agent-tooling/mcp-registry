@@ -17,6 +17,8 @@
     "@hono/standard-validator": "^0.2.2",
     "@standard-community/standard-json": "^0.3.5",
     "@standard-community/standard-openapi": "^0.2.9",
+    "@vercel/analytics": "^2.0.1",
+    "better-env": "^0.3.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

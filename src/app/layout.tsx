@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
+import { VercelAnalytics } from "@/components/analytics";
 import { ThemeProvider } from "@/components/themes/provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           >
             {children}
             <Toaster />
+            <VercelAnalytics />
           </ThemeProvider>
         </NuqsAdapter>
       </body>
