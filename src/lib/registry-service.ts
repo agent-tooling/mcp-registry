@@ -15,7 +15,7 @@ type PageResult = {
   nextPageIndex?: number;
 };
 
-function getSourcePath(): string {
+export function getSourcePath(): string {
   return (
     process.env.MCP_REGISTRY_SOURCE_PATH ??
     path.resolve(process.cwd(), "../registry.json")
@@ -27,6 +27,17 @@ const loadRegistryCached = unstable_cache(
   ["registry-entries"],
   { revalidate: 300 },
 );
+
+export async function getAllServers(): Promise<ServerEntry[]> {
+  return loadRegistryCached();
+}
+
+export async function getServerByName(
+  name: string,
+): Promise<ServerEntry | undefined> {
+  const entries = await loadRegistryCached();
+  return entries.find((entry) => entry.server.name === name);
+}
 
 export async function listServersByPage(input: {
   search?: string;

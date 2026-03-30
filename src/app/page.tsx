@@ -123,53 +123,49 @@ export default async function HomePage({ searchParams }: PageProps) {
                   ?.status;
 
               return (
-                <Card key={server.name}>
-                  <CardHeader className="space-y-1 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <CardTitle className="text-base md:text-lg">
-                        {server.title ?? server.name}
-                      </CardTitle>
-                      {status ? (
-                        <span className="inline-flex shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
-                          {status}
+                <Link
+                  key={server.name}
+                  href={`/servers/${server.name}`}
+                  className="group"
+                >
+                  <Card className="transition-colors group-hover:border-primary/50">
+                    <CardHeader className="space-y-1 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <CardTitle className="text-base md:text-lg">
+                          {server.title ?? server.name}
+                        </CardTitle>
+                        {status ? (
+                          <span className="inline-flex shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
+                            {status}
+                          </span>
+                        ) : null}
+                      </div>
+                      <CardDescription className="break-all">
+                        {server.name}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5 px-3 pb-3 pt-0 text-sm">
+                      <p className="text-muted-foreground">
+                        {server.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className="rounded-md bg-muted px-2 py-1">
+                          version: {server.version}
                         </span>
-                      ) : null}
-                    </div>
-                    <CardDescription className="break-all">
-                      {server.name}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-1.5 px-3 pb-3 pt-0 text-sm">
-                    <p className="text-muted-foreground">
-                      {server.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-md bg-muted px-2 py-1">
-                        version: {server.version}
-                      </span>
-                      {server.websiteUrl ? (
-                        <a
-                          href={server.websiteUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-md bg-muted px-2 py-1 hover:underline"
-                        >
-                          website
-                        </a>
-                      ) : null}
-                      {server.repository?.url ? (
-                        <a
-                          href={server.repository.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-md bg-muted px-2 py-1 hover:underline"
-                        >
-                          repository
-                        </a>
-                      ) : null}
-                    </div>
-                  </CardContent>
-                </Card>
+                        {server.websiteUrl ? (
+                          <span className="rounded-md bg-muted px-2 py-1">
+                            website
+                          </span>
+                        ) : null}
+                        {server.repository?.url ? (
+                          <span className="rounded-md bg-muted px-2 py-1">
+                            repository
+                          </span>
+                        ) : null}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               );
             })}
           </section>

@@ -52,6 +52,52 @@ const repositorySchema = z
   })
   .passthrough();
 
+const environmentVariableSchema = z
+  .object({
+    name: z.string(),
+    description: z.string().optional(),
+    isRequired: z.boolean().optional(),
+    isSecret: z.boolean().optional(),
+  })
+  .passthrough();
+
+const transportSchema = z
+  .object({
+    type: z.string(),
+  })
+  .passthrough();
+
+const packageSchema = z
+  .object({
+    registryType: z.string(),
+    registryBaseUrl: z.string().url().optional(),
+    identifier: z.string(),
+    version: z.string().optional(),
+    runtimeHint: z.string().optional(),
+    transport: transportSchema.optional(),
+    environmentVariables: z.array(environmentVariableSchema).optional(),
+  })
+  .passthrough();
+
+const remoteHeaderSchema = z
+  .object({
+    name: z.string(),
+    description: z.string().optional(),
+    isRequired: z.boolean().optional(),
+    isSecret: z.boolean().optional(),
+    format: z.string().optional(),
+    default: z.string().optional(),
+  })
+  .passthrough();
+
+const remoteSchema = z
+  .object({
+    type: z.string(),
+    url: z.string().url(),
+    headers: z.array(remoteHeaderSchema).optional(),
+  })
+  .passthrough();
+
 export const serverDetailSchema = z
   .object({
     $schema: z.string().url().optional(),
@@ -62,8 +108,8 @@ export const serverDetailSchema = z
     version: z.string().min(1).max(255),
     websiteUrl: z.string().url().optional(),
     icons: z.array(iconSchema).optional(),
-    packages: z.array(z.unknown()).optional(),
-    remotes: z.array(z.unknown()).optional(),
+    packages: z.array(packageSchema).optional(),
+    remotes: z.array(remoteSchema).optional(),
     _meta: serverDetailMetaSchema.optional(),
   })
   .passthrough();
