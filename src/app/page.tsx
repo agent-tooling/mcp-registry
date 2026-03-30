@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { OpenApiMenu } from "@/components/openapi-menu";
 import { ServerSearchInput } from "@/components/search/server-search-input";
+import { ServerIcon } from "@/components/server-icon";
 import { ThemeSelector } from "@/components/themes/selector";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -130,19 +131,28 @@ export default async function HomePage({ searchParams }: PageProps) {
                 >
                   <Card className="transition-colors group-hover:border-primary/50">
                     <CardHeader className="space-y-1 p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <CardTitle className="text-base md:text-lg">
-                          {server.title ?? server.name}
-                        </CardTitle>
-                        {status ? (
-                          <span className="inline-flex shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
-                            {status}
-                          </span>
-                        ) : null}
+                      <div className="flex items-start gap-3">
+                        <ServerIcon
+                          icons={server.icons}
+                          title={server.title ?? server.name}
+                          size="sm"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <CardTitle className="text-base md:text-lg">
+                              {server.title ?? server.name}
+                            </CardTitle>
+                            {status ? (
+                              <span className="inline-flex shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
+                                {status}
+                              </span>
+                            ) : null}
+                          </div>
+                          <CardDescription className="break-all">
+                            {server.name}
+                          </CardDescription>
+                        </div>
                       </div>
-                      <CardDescription className="break-all">
-                        {server.name}
-                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-1.5 px-3 pb-3 pt-0 text-sm">
                       <p className="text-muted-foreground">

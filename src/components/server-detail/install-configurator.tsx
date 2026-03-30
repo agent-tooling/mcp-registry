@@ -45,13 +45,6 @@ type InstallConfiguratorProps = {
   remotes?: Remote[];
 };
 
-const AGENTS = [
-  { id: "cursor", label: "Cursor" },
-  { id: "claude-code", label: "Claude Code" },
-  { id: "windsurf", label: "Windsurf" },
-  { id: "vscode", label: "VS Code" },
-] as const;
-
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -79,58 +72,6 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function useAgentSelection() {
-  const [agents, setAgents] = useState<Set<string>>(new Set(["cursor"]));
-
-  function toggle(agentId: string) {
-    setAgents((prev) => {
-      const next = new Set(prev);
-      if (next.has(agentId)) {
-        next.delete(agentId);
-      } else {
-        next.add(agentId);
-      }
-      return next;
-    });
-  }
-
-  return { agents, toggle };
-}
-
-function AgentSelector({
-  agents,
-  onToggle,
-}: {
-  agents: Set<string>;
-  onToggle: (id: string) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">Agent</Label>
-      <div className="flex flex-wrap gap-2">
-        {AGENTS.map((agent) => {
-          const selected = agents.has(agent.id);
-          return (
-            <button
-              key={agent.id}
-              type="button"
-              onClick={() => onToggle(agent.id)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-                selected
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-              }`}
-            >
-              {selected && <CheckIcon className="size-3" />}
-              {agent.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function CommandBlock({ command }: { command: string }) {
   return (
     <div className="space-y-2">
@@ -145,15 +86,7 @@ function CommandBlock({ command }: { command: string }) {
   );
 }
 
-function buildAgentFlags(agents: Set<string>): string {
-  if (agents.size === 0) return "";
-  return Array.from(agents)
-    .map((a) => `-a ${a}`)
-    .join(" ");
-}
-
 function PackageConfigurator({ pkg }: { pkg: Package }) {
-  const { agents, toggle } = useAgentSelection();
   const [envValues, setEnvValues] = useState<Record<string, string>>({});
 
   function setEnvValue(name: string, value: string) {
@@ -163,16 +96,13 @@ function PackageConfigurator({ pkg }: { pkg: Package }) {
   const command = useMemo(() => {
     const parts = ["bunx add-mcp", pkg.identifier];
 
-    const agentFlags = buildAgentFlags(agents);
-    if (agentFlags) parts.push(agentFlags);
-
     for (const envVar of pkg.environmentVariables ?? []) {
       const value = envValues[envVar.name] || `<${envVar.name}>`;
       parts.push(`--env ${envVar.name}=${value}`);
     }
 
     return parts.join(" ");
-  }, [pkg, agents, envValues]);
+  }, [pkg, envValues]);
 
   return (
     <div className="space-y-5">
@@ -183,8 +113,6 @@ function PackageConfigurator({ pkg }: { pkg: Package }) {
           {pkg.identifier}
         </span>
       </div>
-
-      <AgentSelector agents={agents} onToggle={toggle} />
 
       {pkg.environmentVariables && pkg.environmentVariables.length > 0 && (
         <div className="space-y-3">
@@ -234,7 +162,6 @@ function PackageConfigurator({ pkg }: { pkg: Package }) {
 }
 
 function RemoteConfigurator({ remote }: { remote: Remote }) {
-  const { agents, toggle } = useAgentSelection();
   const [headerValues, setHeaderValues] = useState<Record<string, string>>({});
 
   function setHeaderValue(name: string, value: string) {
@@ -249,9 +176,6 @@ function RemoteConfigurator({ remote }: { remote: Remote }) {
   const command = useMemo(() => {
     const parts = ["bunx add-mcp", remote.url];
 
-    const agentFlags = buildAgentFlags(agents);
-    if (agentFlags) parts.push(agentFlags);
-
     parts.push(`--transport ${transportFlag}`);
 
     for (const header of remote.headers ?? []) {
@@ -260,7 +184,7 @@ function RemoteConfigurator({ remote }: { remote: Remote }) {
     }
 
     return parts.join(" ");
-  }, [remote, agents, headerValues, transportFlag]);
+  }, [remote, headerValues, transportFlag]);
 
   const displayType =
     remote.type === "sse"
@@ -277,8 +201,6 @@ function RemoteConfigurator({ remote }: { remote: Remote }) {
           {remote.url}
         </span>
       </div>
-
-      <AgentSelector agents={agents} onToggle={toggle} />
 
       {remote.headers && remote.headers.length > 0 && (
         <div className="space-y-3">

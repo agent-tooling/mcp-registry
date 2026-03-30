@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ServerDetailContent } from "@/components/server-detail/server-detail-content";
+import { fetchGitHubRepoData } from "@/lib/github";
 import { loadRegistryFromFile } from "@/lib/load-registry";
 import { getServerByName, getSourcePath } from "@/lib/registry-service";
 
@@ -45,6 +46,10 @@ export default async function ServerDetailPage({ params }: PageProps) {
   const officialStatus =
     entry._meta?.["io.modelcontextprotocol.registry/official"]?.status;
 
+  const githubData = server.repository?.url
+    ? await fetchGitHubRepoData(server.repository.url)
+    : null;
+
   return (
     <div className="min-h-screen bg-background">
       <ServerDetailContent
@@ -55,10 +60,12 @@ export default async function ServerDetailPage({ params }: PageProps) {
           version: server.version,
           websiteUrl: server.websiteUrl,
           repository: server.repository,
+          icons: server.icons,
           packages: server.packages,
           remotes: server.remotes,
         }}
         officialStatus={officialStatus}
+        githubData={githubData}
       />
     </div>
   );

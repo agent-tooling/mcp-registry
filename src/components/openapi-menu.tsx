@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, ExternalLink, FileJson } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +13,18 @@ import {
 const OPENAPI_URL = "/api/openapi.json";
 
 export function OpenApiMenu() {
+  async function handleCopyContent() {
+    try {
+      const res = await fetch(OPENAPI_URL);
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      toast.success("OpenAPI spec copied to clipboard");
+    } catch {
+      toast.error("Failed to copy OpenAPI spec");
+    }
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,14 +40,9 @@ export function OpenApiMenu() {
             Open
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            const url = new URL(OPENAPI_URL, window.location.origin);
-            void navigator.clipboard.writeText(url.toString());
-          }}
-        >
+        <DropdownMenuItem onClick={() => void handleCopyContent()}>
           <Copy className="mr-2 h-4 w-4" />
-          Copy URL
+          Copy Content
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
