@@ -26,6 +26,19 @@ function normalizeSearch(search: string | undefined): string {
   return (search ?? "").trim().toLowerCase();
 }
 
+const NOISE_SEGMENTS = new Set(["com", "io", "github", "app", "mcp"]);
+
+function sortLabel(entry: ServerEntry): string {
+  if (entry.server.title) {
+    return entry.server.title.toLowerCase();
+  }
+  return entry.server.name
+    .split(/[./]/)
+    .filter((seg) => seg && !NOISE_SEGMENTS.has(seg))
+    .join(" ")
+    .toLowerCase();
+}
+
 function parseLimit(limit: string | undefined): number {
   if (!limit) {
     return DEFAULT_LIMIT;
@@ -83,7 +96,7 @@ export function queryServers(
 
   const filtered = entries
     .slice()
-    .sort((a, b) => a.server.name.localeCompare(b.server.name))
+    .sort((a, b) => sortLabel(a).localeCompare(sortLabel(b)))
     .filter((entry) => {
       if (!search) {
         return true;

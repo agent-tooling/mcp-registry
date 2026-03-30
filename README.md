@@ -1,37 +1,36 @@
-# mcp-registry
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A read-only MCP registry service built with Bun, TypeScript, and Hono.
+## Getting Started
 
-## Install
-
-```bash
-bun install
-```
-
-## Environment
-
-Set `MCP_REGISTRY_SOURCE_PATH` in `.env` to a JSON file containing an array of server entries.
-
-Example:
+First, run the development server:
 
 ```bash
-MCP_REGISTRY_SOURCE_PATH=./fixtures/registry.json
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Build
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-bun run build
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-Build output entry point:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-dist/server.js
-```
+## Learn More
 
-## Run
+To learn more about Next.js, take a look at the following resources:
 
-```bash
-bun dist/server.js
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
