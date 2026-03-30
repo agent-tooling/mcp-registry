@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# mcp-registry
 
-## Getting Started
+Self-hostable read-only MCP registry server following the [official MCP registry specification](https://github.com/modelcontextprotocol/registry).
 
-First, run the development server:
+## Architecture
+
+- **Next.js** app with a React Server Component UI and a [Hono](https://hono.dev/) API mounted at `/api`
+- **Registry source** is a JSON file (local path or URL) matching the MCP registry schema
+- **API** provides search, cursor pagination, and an OpenAPI spec at `/api/openapi.json`
+- **UI** uses shadcn/ui with dark mode via next-themes and instant search via nuqs
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+cp .env.example .env
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set `MCP_REGISTRY_SOURCE_PATH` in `.env` to a local JSON file or a raw GitHub URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+MCP_REGISTRY_SOURCE_PATH=./fixtures/registry.json
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Other scripts:
 
-## Learn More
+```bash
+bun run typecheck    # type check
+bun run test         # run tests
+bun run fmt          # format with prettier
+bun run fmt:check    # check formatting
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy to Vercel or any platform that supports Next.js:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+vercel
+```
 
-## Deploy on Vercel
+Set `MCP_REGISTRY_SOURCE_PATH` as an environment variable pointing to your registry JSON file.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Example
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+An example server running mcp-registry is [mcp-registry.agent-tooling.dev](https://mcp-registry.agent-tooling.dev/).

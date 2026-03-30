@@ -10,10 +10,27 @@ function formatZodError(error: ZodError): string {
     .join("; ");
 }
 
+function isUrl(value: string): boolean {
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
+async function fetchContent(source: string): Promise<string> {
+  if (isUrl(source)) {
+    const response = await fetch(source);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch registry from ${source}: ${response.status} ${response.statusText}`,
+      );
+    }
+    return response.text();
+  }
+  return readFile(source, "utf8");
+}
+
 export async function loadRegistryFromFile(
   sourcePath: string,
 ): Promise<ServerEntry[]> {
-  const rawContent = await readFile(sourcePath, "utf8");
+  const rawContent = await fetchContent(sourcePath);
 
   let parsedJson: unknown;
   try {
