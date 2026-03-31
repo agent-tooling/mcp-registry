@@ -102,8 +102,8 @@ export const serverDetailSchema = z
   .object({
     $schema: z.string().url().optional(),
     name: z.string().min(3).max(200).regex(serverNamePattern),
-    description: z.string().min(1).max(100),
-    title: z.string().min(1).max(100).optional(),
+    description: z.string().min(1).max(500),
+    title: z.string().min(1).max(200).optional(),
     repository: repositorySchema.optional(),
     version: z.string().min(1).max(255),
     websiteUrl: z.string().url().optional(),
