@@ -44,4 +44,4 @@ Set `MCP_REGISTRY_SOURCE_PATH` as an environment variable pointing to your regis
 
 ## Example
 
-An example server running mcp-registry is [mcp-registry.agent-tooling.dev](https://mcp-registry.agent-tooling.dev/).
+An example server running mcp-registry is [mcp-registry.agent-tooling.dev](https://mcp.agent-tooling.dev/).
