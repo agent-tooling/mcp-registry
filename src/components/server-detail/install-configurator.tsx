@@ -94,7 +94,7 @@ function PackageConfigurator({ pkg }: { pkg: Package }) {
   }
 
   const command = useMemo(() => {
-    const parts = ["bunx add-mcp", pkg.identifier];
+    const parts = ["npx add-mcp@latest", pkg.identifier];
 
     for (const envVar of pkg.environmentVariables ?? []) {
       const value = envValues[envVar.name] || `<${envVar.name}>`;
@@ -174,7 +174,7 @@ function RemoteConfigurator({ remote }: { remote: Remote }) {
   }, [remote.type]);
 
   const command = useMemo(() => {
-    const parts = ["bunx add-mcp", remote.url];
+    const parts = ["npx add-mcp@latest", remote.url];
 
     parts.push(`--transport ${transportFlag}`);
 
