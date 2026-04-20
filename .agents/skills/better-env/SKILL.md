@@ -50,8 +50,8 @@ The CLI gives a consistent workflow for initialization, sync, validation, and re
 
 Choose the command runner to match the repo:
 
-- Use `npx` in npm/pnpm-based repos (for example lockfiles like `package-lock.json` or `pnpm-lock.yaml` and scripts run via `npm`/`pnpm`).
-- Use `bunx` in Bun-based repos (for example `bun.lock` and scripts run via `bun`).
+- Use `pnpm dlx` in pnpm-based repos (for example `pnpm-lock.yaml` and scripts run via `pnpm`).
+- Use `npx` in npm-based repos (for example `package-lock.json` and scripts run via `npm`).
 - Keep commands aligned with the project's existing package manager/runtime conventions; do not mix runners unless the repo already does.
 
 Recommended flow in a repo:

@@ -12,9 +12,9 @@ Self-hostable read-only MCP registry server following the [official MCP registry
 ## Development
 
 ```bash
-bun install
+pnpm install
 cp .env.example .env
-bun run dev
+pnpm run dev
 ```
 
 Set `MCP_REGISTRY_SOURCE_PATH` in `.env` to a local JSON file or a raw GitHub URL:
@@ -26,10 +26,10 @@ MCP_REGISTRY_SOURCE_PATH=./fixtures/registry.json
 Other scripts:
 
 ```bash
-bun run typecheck    # type check
-bun run test         # run tests
-bun run fmt          # format with prettier
-bun run fmt:check    # check formatting
+pnpm run typecheck    # type check
+pnpm run test         # run tests
+pnpm run fmt          # format with prettier
+pnpm run fmt:check    # check formatting
 ```
 
 ## Deployment

@@ -9,7 +9,7 @@
 3. Pull remote env vars into the configured local env file (unless `remote: null`).
 4. Ensure that env file is ignored by git (unless `gitignore.ensure: false`).
 
-After pulling, run your project command directly (for example `bun run dev`).
+After pulling, run your project command directly (for example `pnpm run dev`).
 
 ## Env File Strategy (Next.js/Vercel)
 

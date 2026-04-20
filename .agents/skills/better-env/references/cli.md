@@ -97,7 +97,7 @@ Missing env var locally:
 
 ```bash
 better-env pull --environment development
-bun run dev
+pnpm run dev
 better-env validate --environment development
 ```
 
