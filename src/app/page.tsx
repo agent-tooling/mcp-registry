@@ -56,11 +56,11 @@ export default async function HomePage({ searchParams }: PageProps) {
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-2">
               <h1 className="text-balance text-3xl font-bold tracking-tight md:text-5xl">
-                integrations.sh MCP Registry
+                MCP Registry
               </h1>
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-pretty text-base text-muted-foreground md:text-lg">
-                  Browse MCP servers generated from integrations.sh.
+                  Browse and discover MCP servers.
                 </p>
                 <OpenApiMenu />
               </div>
