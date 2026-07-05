@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "registry:sync": "node scripts/sync-integrations-sh.mjs",
     "typecheck": "tsc --noEmit",
     "fmt": "prettier --write .",
     "fmt:check": "prettier -c .",

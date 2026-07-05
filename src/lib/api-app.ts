@@ -21,7 +21,7 @@ const healthResponseSchema = z.object({ status: z.literal("ok") });
 function getSourcePath(): string {
   return (
     process.env.MCP_REGISTRY_SOURCE_PATH ??
-    path.resolve(process.cwd(), "../registry.json")
+    path.resolve(process.cwd(), "data/integrations-sh-registry.json")
   );
 }
 

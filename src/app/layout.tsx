@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MCP Registry",
-  description: "Browse MCP servers with search and pagination.",
+  title: "integrations.sh MCP Registry",
+  description: "Browse MCP servers generated from integrations.sh.",
 };
 
 type RootLayoutProps = {
