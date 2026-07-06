@@ -1,12 +1,11 @@
 import path from "node:path";
 
-import { track } from "@vercel/analytics/server";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { describeRoute, openAPIRouteHandler, resolver } from "hono-openapi";
 import { z } from "zod";
 
-import { analyticsConfig } from "./analytics/config";
+import { recordApiRequest } from "./analytics/postgres";
 import { loadRegistryFromFile } from "./load-registry";
 import { queryServers } from "./query-servers";
 import { listResponseSchema, type ServerEntry } from "./schema";
@@ -21,7 +20,7 @@ const healthResponseSchema = z.object({ status: z.literal("ok") });
 function getSourcePath(): string {
   return (
     process.env.MCP_REGISTRY_SOURCE_PATH ??
-    path.resolve(process.cwd(), "../registry.json")
+    path.resolve(process.cwd(), "fixtures/registry.json")
   );
 }
 
@@ -36,14 +35,23 @@ async function getRegistryEntries(): Promise<ServerEntry[]> {
 export const apiApp = new Hono().basePath("/api");
 
 apiApp.use(async (c, next) => {
+  const startedAt = performance.now();
   await next();
-  if (!analyticsConfig.isEnabled) return;
-  track("api_request", {
+
+  await recordApiRequest({
     path: c.req.path,
     method: c.req.method,
     status: c.res.status,
-    search: c.req.query("search") ?? "",
-  }).catch(() => {});
+    search: c.req.query("search"),
+    limit: c.req.query("limit"),
+    cursorPresent: Boolean(c.req.query("cursor")),
+    userAgent: c.req.header("user-agent"),
+    referrer: c.req.header("referer") ?? c.req.header("referrer"),
+    ip:
+      c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+      c.req.header("x-real-ip"),
+    durationMs: Math.max(0, Math.round(performance.now() - startedAt)),
+  });
 });
 
 apiApp.get(
