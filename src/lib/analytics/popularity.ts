@@ -5,6 +5,8 @@ import { getSearchStats, type SearchStats } from "./search-stats";
 export type PopularityScore = {
   allTime: number;
   thisWeek: number;
+  /** Daily counts aligned to the stats' dailyWindow (oldest first). */
+  daily?: number[];
 };
 
 /** Server name -> aggregated search counts. */
@@ -21,8 +23,9 @@ export function computePopularityScores(
   stats: SearchStats,
 ): PopularityScores {
   const scores: PopularityScores = new Map();
+  const dailyWindow = stats.dailyWindow;
 
-  for (const { term, allTime, thisWeek } of stats.terms) {
+  for (const { term, allTime, thisWeek, daily } of stats.terms) {
     const normalized = normalizeSearch(term);
     if (!normalized) {
       continue;
@@ -36,12 +39,22 @@ export function computePopularityScores(
     }
 
     for (const entry of matches) {
-      const existing = scores.get(entry.server.name);
-      if (existing) {
-        existing.allTime += allTime;
-        existing.thisWeek += thisWeek;
-      } else {
-        scores.set(entry.server.name, { allTime, thisWeek });
+      let score = scores.get(entry.server.name);
+      if (!score) {
+        score = {
+          allTime: 0,
+          thisWeek: 0,
+          daily: dailyWindow ? dailyWindow.map(() => 0) : undefined,
+        };
+        scores.set(entry.server.name, score);
+      }
+      score.allTime += allTime;
+      score.thisWeek += thisWeek;
+
+      if (dailyWindow && score.daily && daily) {
+        for (let i = 0; i < dailyWindow.length; i += 1) {
+          score.daily[i] += daily[dailyWindow[i]] ?? 0;
+        }
       }
     }
   }

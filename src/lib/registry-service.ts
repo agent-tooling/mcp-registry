@@ -56,7 +56,12 @@ export async function getServerByName(
   return entries.find((entry) => entry.server.name === name);
 }
 
-export type SearchCount = { allTime: number; thisWeek: number };
+export type SearchCount = {
+  allTime: number;
+  thisWeek: number;
+  /** Daily counts (oldest first) over the analytics daily window. */
+  daily?: number[];
+};
 
 export type RelatedServer = {
   entry: ServerEntry;
@@ -99,10 +104,16 @@ export async function getServerPageData(
       return labelA.localeCompare(labelB);
     })
     .slice(0, RELATED_LIMIT)
-    .map((e) => ({
-      entry: e,
-      searchCount: popularity?.get(e.server.name),
-    }));
+    .map((e) => {
+      const score = popularity?.get(e.server.name);
+      return {
+        entry: e,
+        // Cards don't render daily series; keep the RSC payload lean.
+        searchCount: score
+          ? { allTime: score.allTime, thisWeek: score.thisWeek }
+          : undefined,
+      };
+    });
 
   return {
     entry,
@@ -173,7 +184,11 @@ export async function listServersByPage(input: {
     for (const entry of result.servers) {
       const score = popularity.get(entry.server.name);
       if (score) {
-        searchCounts[entry.server.name] = score;
+        // Cards don't render daily series; keep the RSC payload lean.
+        searchCounts[entry.server.name] = {
+          allTime: score.allTime,
+          thisWeek: score.thisWeek,
+        };
       }
     }
   }

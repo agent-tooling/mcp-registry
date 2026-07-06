@@ -10,9 +10,11 @@ import {
   UserIcon,
 } from "lucide-react";
 
+import { Sparkline } from "@/components/sparkline";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Publisher } from "@/lib/publisher";
+import type { SearchCount } from "@/lib/registry-service";
 
 export type OfficialMeta = {
   status?: string;
@@ -27,7 +29,7 @@ export type DetailsCardProps = {
   hasRemotes: boolean;
   hasPackages: boolean;
   packageRegistries: string[];
-  searchCount?: { allTime: number; thisWeek: number };
+  searchCount?: SearchCount;
 };
 
 function formatDate(value: string): string | null {
@@ -161,21 +163,30 @@ export function DetailsCard({
               {updatedAt}
             </DetailRow>
           ) : null}
+        </dl>
 
-          {searchCount && searchCount.allTime > 0 ? (
-            <DetailRow
-              icon={<SearchIcon className="size-3.5" />}
-              label="Searches"
-            >
-              <span className="block tabular-nums">
+        {searchCount && searchCount.allTime > 0 ? (
+          <div className="mt-4 space-y-2 border-t border-border/60 pt-3.5">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <SearchIcon className="size-3.5" />
+                Searches
+              </span>
+              <span className="font-medium tabular-nums">
                 {formatCount(searchCount.allTime)} all time
               </span>
-              <span className="block text-xs font-normal text-muted-foreground tabular-nums">
+            </div>
+            {searchCount.daily && searchCount.daily.length > 1 ? (
+              <Sparkline data={searchCount.daily} className="h-9 w-full" />
+            ) : null}
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>Last {searchCount.daily?.length ?? 30} days</span>
+              <span className="tabular-nums">
                 {formatCount(searchCount.thisWeek)} this week
               </span>
-            </DetailRow>
-          ) : null}
-        </dl>
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
