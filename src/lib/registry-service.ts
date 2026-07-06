@@ -2,8 +2,14 @@ import path from "node:path";
 
 import { unstable_cache } from "next/cache";
 
+import { getPopularityScores } from "./analytics/popularity";
+import { getSearchStats, type SearchStats } from "./analytics/search-stats";
 import { loadRegistryFromFile } from "./load-registry";
-import { queryServers } from "./query-servers";
+import {
+  matchesNormalizedSearch,
+  normalizeSearch,
+  queryServers,
+} from "./query-servers";
 import type { ServerEntry } from "./schema";
 
 const PAGE_SIZE = 20;
@@ -13,6 +19,17 @@ type PageResult = {
   pageIndex: number;
   prevPageIndex?: number;
   nextPageIndex?: number;
+  /** Total servers matching the current search. */
+  totalCount: number;
+  /** Total pages for the current search. */
+  totalPages: number;
+  /** Per-server search counts for the returned page, when analytics exist. */
+  searchCounts: Record<string, { allTime: number; thisWeek: number }>;
+};
+
+export type RegistryOverview = {
+  totalServers: number;
+  searchStats: SearchStats | null;
 };
 
 export function getSourcePath(): string {
@@ -39,12 +56,25 @@ export async function getServerByName(
   return entries.find((entry) => entry.server.name === name);
 }
 
+export async function getRegistryOverview(): Promise<RegistryOverview> {
+  const [entries, searchStats] = await Promise.all([
+    loadRegistryCached(),
+    getSearchStats(),
+  ]);
+
+  return {
+    totalServers: entries.length,
+    searchStats,
+  };
+}
+
 export async function listServersByPage(input: {
   search?: string;
   page?: number;
   limit?: number;
 }): Promise<PageResult> {
   const entries = await loadRegistryCached();
+  const popularity = await getPopularityScores(entries);
   const search = (input.search ?? "").trim();
   const limit = input.limit ?? PAGE_SIZE;
   const requestedPage = input.page ?? 0;
@@ -53,22 +83,45 @@ export async function listServersByPage(input: {
 
   let cursor: string | undefined;
   let currentPage = 0;
-  let result = queryServers(entries, {
-    search,
-    limit: String(limit),
-  });
+  let result = queryServers(
+    entries,
+    {
+      search,
+      limit: String(limit),
+    },
+    { popularity },
+  );
 
   while (currentPage < safePage && result.metadata.nextCursor) {
     cursor = result.metadata.nextCursor;
     currentPage += 1;
-    result = queryServers(entries, {
-      search,
-      limit: String(limit),
-      cursor,
-    });
+    result = queryServers(
+      entries,
+      {
+        search,
+        limit: String(limit),
+        cursor,
+      },
+      { popularity },
+    );
   }
 
   const reachedRequestedPage = currentPage === safePage;
+
+  const normalizedSearch = normalizeSearch(search);
+  const totalCount = entries.filter((entry) =>
+    matchesNormalizedSearch(entry, normalizedSearch),
+  ).length;
+
+  const searchCounts: PageResult["searchCounts"] = {};
+  if (popularity) {
+    for (const entry of result.servers) {
+      const score = popularity.get(entry.server.name);
+      if (score) {
+        searchCounts[entry.server.name] = score;
+      }
+    }
+  }
 
   return {
     servers: result.servers,
@@ -78,5 +131,8 @@ export async function listServersByPage(input: {
       reachedRequestedPage && result.metadata.nextCursor
         ? currentPage + 1
         : undefined,
+    totalCount,
+    totalPages: Math.max(1, Math.ceil(totalCount / limit)),
+    searchCounts,
   };
 }

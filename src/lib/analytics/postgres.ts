@@ -1,10 +1,7 @@
 import { createHash } from "node:crypto";
 
-import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-
 import { apiRequests } from "../db/schema";
-import * as schema from "../db/schema";
+import { getAnalyticsDb } from "./db";
 
 type ApiRequestAnalytics = {
   method: string;
@@ -20,24 +17,13 @@ type ApiRequestAnalytics = {
 };
 
 const enabled = process.env.ENABLE_ANALYTICS === "true";
-const databaseUrl = process.env.DATABASE_URL;
 const analyticsSalt = process.env.ANALYTICS_SALT;
 
-let pool: Pool | undefined;
-let db: NodePgDatabase<typeof schema> | undefined;
-
-function getDb(): NodePgDatabase<typeof schema> | undefined {
-  if (!enabled || !databaseUrl) {
+function getDb() {
+  if (!enabled) {
     return undefined;
   }
-  pool ??= new Pool({
-    connectionString: databaseUrl,
-    max: 1,
-    idleTimeoutMillis: 20_000,
-    connectionTimeoutMillis: 5_000,
-  });
-  db ??= drizzle(pool, { schema });
-  return db;
+  return getAnalyticsDb();
 }
 
 function parseLimit(value: string | undefined): number | null {
