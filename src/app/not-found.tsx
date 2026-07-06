@@ -1,14 +1,36 @@
 import Link from "next/link";
+import { SearchXIcon } from "lucide-react";
+
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6">
-      <h1 className="text-4xl font-bold tracking-tight">404</h1>
-      <p className="text-muted-foreground">Page not found.</p>
-      <Link href="/" className={buttonVariants({ variant: "outline" })}>
-        Back to registry
-      </Link>
+    <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-24 md:px-6">
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <SearchXIcon />
+          </EmptyMedia>
+          <EmptyTitle>Page not found</EmptyTitle>
+          <EmptyDescription>
+            The page you are looking for does not exist or the server was
+            removed from this registry.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+            Back to registry
+          </Link>
+        </EmptyContent>
+      </Empty>
     </div>
   );
 }

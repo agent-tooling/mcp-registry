@@ -171,7 +171,7 @@ export function ServerDetailContent({
   githubData,
 }: ServerDetailContentProps) {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8 md:py-12">
+    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       <Link
         href="/"
         className={buttonVariants({

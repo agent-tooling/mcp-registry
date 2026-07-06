@@ -28,12 +28,12 @@ export function OpenApiMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <FileJson className="h-4 w-4" />
-          OpenAPI Spec
+        <Button variant="ghost" className="gap-1.5">
+          <FileJson className="size-4" />
+          <span className="hidden sm:inline">OpenAPI</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
           <a href={OPENAPI_URL} target="_blank" rel="noreferrer">
             <ExternalLink className="mr-2 h-4 w-4" />

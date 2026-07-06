@@ -9,6 +9,19 @@ type QueryInput = {
   limit?: string;
 };
 
+type PopularityLookup = {
+  get(name: string): { allTime: number; thisWeek: number } | undefined;
+};
+
+type QueryOptions = {
+  /**
+   * Optional search popularity per server name. When provided, unfiltered
+   * results are ordered by all-time searches (desc) before the alphabetical
+   * fallback.
+   */
+  popularity?: PopularityLookup | null;
+};
+
 type QueryResult = {
   servers: ServerEntry[];
   metadata: {
@@ -22,7 +35,7 @@ type CursorPayload = {
   search: string;
 };
 
-function normalizeSearch(search: string | undefined): string {
+export function normalizeSearch(search: string | undefined): string {
   return (search ?? "").trim().toLowerCase();
 }
 
@@ -137,7 +150,11 @@ function isHostedProviderNamespaceMatchOnly(
   return prefixes.some((prefix) => name.startsWith(prefix));
 }
 
-function matchesSearch(entry: ServerEntry, search: string): boolean {
+/** `search` must already be normalized via {@link normalizeSearch}. */
+export function matchesNormalizedSearch(
+  entry: ServerEntry,
+  search: string,
+): boolean {
   if (!search) {
     return true;
   }
@@ -149,9 +166,25 @@ function matchesSearch(entry: ServerEntry, search: string): boolean {
   return searchableText(entry).includes(search);
 }
 
+function compareEntries(
+  a: ServerEntry,
+  b: ServerEntry,
+  popularity: PopularityLookup | null | undefined,
+): number {
+  if (popularity) {
+    const scoreA = popularity.get(a.server.name)?.allTime ?? 0;
+    const scoreB = popularity.get(b.server.name)?.allTime ?? 0;
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+  }
+  return sortLabel(a).localeCompare(sortLabel(b));
+}
+
 export function queryServers(
   entries: ServerEntry[],
   input: QueryInput,
+  options: QueryOptions = {},
 ): QueryResult {
   const search = normalizeSearch(input.search);
   const limit = parseLimit(input.limit);
@@ -167,8 +200,8 @@ export function queryServers(
 
   const filtered = entries
     .slice()
-    .sort((a, b) => sortLabel(a).localeCompare(sortLabel(b)))
-    .filter((entry) => matchesSearch(entry, search));
+    .sort((a, b) => compareEntries(a, b, options.popularity))
+    .filter((entry) => matchesNormalizedSearch(entry, search));
 
   const page = filtered.slice(offset, offset + limit);
   const nextOffset = offset + page.length;

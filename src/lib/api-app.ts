@@ -5,10 +5,12 @@ import { HTTPException } from "hono/http-exception";
 import { describeRoute, openAPIRouteHandler, resolver } from "hono-openapi";
 import { z } from "zod";
 
+import { getPopularityScores } from "./analytics/popularity";
 import { recordApiRequest } from "./analytics/postgres";
 import { loadRegistryFromFile } from "./load-registry";
 import { queryServers } from "./query-servers";
 import { listResponseSchema, type ServerEntry } from "./schema";
+import { getSiteConfig } from "./site-config";
 
 const querySchema = z.object({
   search: z.string().optional(),
@@ -131,9 +133,10 @@ apiApp.get(
       limit: c.req.query("limit"),
     });
     const entries = await getRegistryEntries();
+    const popularity = await getPopularityScores(entries);
 
     try {
-      const result = queryServers(entries, parsedQuery);
+      const result = queryServers(entries, parsedQuery, { popularity });
       return c.json(listResponseSchema.parse(result));
     } catch (error) {
       const detail = error instanceof Error ? error.message : "Invalid query";
@@ -147,7 +150,7 @@ apiApp.get(
   openAPIRouteHandler(apiApp, {
     documentation: {
       info: {
-        title: "MCP Registry API",
+        title: `${getSiteConfig().name} API`,
         version: "1.0.0",
         description:
           "Read-only API for querying MCP registry servers with search and cursor pagination.",

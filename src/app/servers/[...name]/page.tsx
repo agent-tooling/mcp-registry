@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${entry.server.title ?? entry.server.name} - MCP Registry`,
+    title: entry.server.title ?? entry.server.name,
     description: entry.server.description,
   };
 }
@@ -51,7 +51,7 @@ export default async function ServerDetailPage({ params }: PageProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       <ServerDetailContent
         server={{
           name: server.name,
