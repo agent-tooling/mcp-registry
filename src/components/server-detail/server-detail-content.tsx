@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -13,82 +11,24 @@ import {
   CircleDotIcon,
 } from "lucide-react";
 
+import { CopyButton } from "@/components/copy-button";
+import { ServerCard } from "@/components/server-card";
+import { ServerIcon } from "@/components/server-icon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ServerIcon } from "@/components/server-icon";
+import type { GitHubRepoData } from "@/lib/github";
+import type { RelatedServer, SearchCount } from "@/lib/registry-service";
+import type { ServerEntry } from "@/lib/schema";
+import { searchQueryForServerName } from "@/lib/query-servers";
+import { ApiAccessCard } from "./api-access-card";
+import { DetailsCard } from "./details-card";
 import { InstallConfigurator } from "./install-configurator";
 
-type EnvVar = {
-  name: string;
-  description?: string;
-  isRequired?: boolean;
-  isSecret?: boolean;
-};
-
-type Package = {
-  registryType: string;
-  identifier: string;
-  version?: string;
-  runtimeHint?: string;
-  transport?: { type: string };
-  environmentVariables?: EnvVar[];
-};
-
-type RemoteHeader = {
-  name: string;
-  description?: string;
-  isRequired?: boolean;
-  isSecret?: boolean;
-  format?: string;
-  default?: string;
-};
-
-type Remote = {
-  type: string;
-  url: string;
-  headers?: RemoteHeader[];
-};
-
-type GitHubRepoData = {
-  fullName: string;
-  description: string | null;
-  stars: number;
-  forks: number;
-  openIssues: number;
-  language: string | null;
-  license: string | null;
-  updatedAt: string;
-  htmlUrl: string;
-  latestRelease: {
-    tagName: string;
-    publishedAt: string;
-    htmlUrl: string;
-  } | null;
-};
-
-type Icon = {
-  src: string;
-  mimeType?: string;
-  sizes?: string[];
-  theme?: "light" | "dark";
-};
-
-type ServerData = {
-  name: string;
-  title?: string;
-  description: string;
-  version: string;
-  websiteUrl?: string;
-  repository?: { url?: string; source?: string; subfolder?: string };
-  icons?: Icon[];
-  packages?: Package[];
-  remotes?: Remote[];
-};
-
 type ServerDetailContentProps = {
-  server: ServerData;
-  officialStatus?: string;
+  entry: ServerEntry;
+  searchCount?: SearchCount;
+  related: RelatedServer[];
   githubData?: GitHubRepoData | null;
 };
 
@@ -100,8 +40,8 @@ function formatNumber(n: number): string {
 function GitHubCard({ data }: { data: GitHubRepoData }) {
   return (
     <a href={data.htmlUrl} target="_blank" rel="noreferrer" className="block">
-      <Card className="transition-colors hover:border-primary/50">
-        <CardContent className="space-y-3 p-4">
+      <Card className="transition-all hover:shadow-md hover:ring-primary/40">
+        <CardContent className="space-y-3">
           <div className="flex items-center gap-2">
             <GitBranchIcon className="size-4 text-muted-foreground" />
             <span className="font-mono text-sm font-medium">
@@ -166,10 +106,21 @@ function GitHubCard({ data }: { data: GitHubRepoData }) {
 }
 
 export function ServerDetailContent({
-  server,
-  officialStatus,
+  entry,
+  searchCount,
+  related,
   githubData,
 }: ServerDetailContentProps) {
+  const server = entry.server;
+  const officialMeta =
+    entry._meta?.["io.modelcontextprotocol.registry/official"];
+  const namespace = server.name.split("/")[0];
+  const hasRemotes = (server.remotes ?? []).length > 0;
+  const hasPackages = (server.packages ?? []).length > 0;
+  const packageRegistries = [
+    ...new Set((server.packages ?? []).map((pkg) => pkg.registryType)),
+  ];
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6 md:py-12">
       <Link
@@ -191,27 +142,28 @@ export function ServerDetailContent({
             size="lg"
           />
           <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-                  {server.title ?? server.name}
-                </h1>
-                <Badge variant="secondary" className="shrink-0">
-                  v{server.version}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+                {server.title ?? server.name}
+              </h1>
+              <Badge variant="secondary" className="shrink-0 font-mono">
+                v{server.version}
+              </Badge>
+              {officialMeta?.status && officialMeta.status !== "active" ? (
+                <Badge variant="destructive" className="shrink-0 capitalize">
+                  {officialMeta.status}
                 </Badge>
-              </div>
-              {officialStatus && (
-                <Badge variant="outline" className="shrink-0 capitalize">
-                  {officialStatus}
-                </Badge>
-              )}
+              ) : null}
             </div>
-            <p className="font-mono text-sm text-muted-foreground break-all">
-              {server.name}
-            </p>
+            <div className="flex items-center gap-1">
+              <p className="font-mono text-sm break-all text-muted-foreground">
+                {server.name}
+              </p>
+              <CopyButton text={server.name} label="Copy server name" />
+            </div>
           </div>
         </div>
-        <p className="text-muted-foreground">{server.description}</p>
+        <p className="max-w-3xl text-muted-foreground">{server.description}</p>
         <div className="flex flex-wrap items-center gap-2">
           {server.websiteUrl && (
             <a
@@ -221,7 +173,6 @@ export function ServerDetailContent({
               className={buttonVariants({
                 variant: "outline",
                 size: "sm",
-                className: "h-6 gap-1 text-xs",
               })}
             >
               <ExternalLinkIcon className="size-3" />
@@ -236,7 +187,6 @@ export function ServerDetailContent({
               className={buttonVariants({
                 variant: "outline",
                 size: "sm",
-                className: "h-6 gap-1 text-xs",
               })}
             >
               <GitBranchIcon className="size-3" />
@@ -249,7 +199,7 @@ export function ServerDetailContent({
       <hr className="my-8 border-border" />
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 space-y-10">
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Install with add-mcp</h2>
             <p className="text-sm text-muted-foreground">
@@ -269,17 +219,54 @@ export function ServerDetailContent({
               remotes={server.remotes}
             />
           </section>
+
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">API access</h2>
+            <ApiAccessCard
+              searchQuery={searchQueryForServerName(server.name)}
+            />
+          </section>
         </div>
 
-        {githubData && (
-          <aside className="w-full shrink-0 lg:w-72">
-            <div className="lg:sticky lg:top-8">
-              <h2 className="mb-3 text-lg font-semibold">Repository</h2>
+        <aside className="w-full shrink-0 space-y-6 lg:w-80">
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Details</h2>
+            <DetailsCard
+              namespace={namespace}
+              version={server.version}
+              officialMeta={officialMeta}
+              hasRemotes={hasRemotes}
+              hasPackages={hasPackages}
+              packageRegistries={packageRegistries}
+              searchCount={searchCount}
+            />
+          </section>
+
+          {githubData && (
+            <section className="space-y-3">
+              <h2 className="text-lg font-semibold">Repository</h2>
               <GitHubCard data={githubData} />
-            </div>
-          </aside>
-        )}
+            </section>
+          )}
+        </aside>
       </div>
+
+      {related.length > 0 && (
+        <section className="mt-12 space-y-4">
+          <h2 className="text-lg font-semibold">
+            More from <span className="font-mono text-base">{namespace}</span>
+          </h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {related.map((item) => (
+              <ServerCard
+                key={item.entry.server.name}
+                entry={item.entry}
+                searchCount={item.searchCount}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

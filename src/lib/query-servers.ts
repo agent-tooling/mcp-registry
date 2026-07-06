@@ -94,6 +94,14 @@ function decodeCursor(cursor: string): CursorPayload {
   }
 }
 
+/**
+ * The search query that reliably matches a server by name via the API/UI
+ * search (hosted-provider prefixes like `io.github.` are not searchable).
+ */
+export function searchQueryForServerName(name: string): string {
+  return meaningfulName(name);
+}
+
 function meaningfulName(name: string): string {
   const normalized = name.toLowerCase();
 

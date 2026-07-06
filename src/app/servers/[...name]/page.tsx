@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ServerDetailContent } from "@/components/server-detail/server-detail-content";
 import { fetchGitHubRepoData } from "@/lib/github";
 import { loadRegistryFromFile } from "@/lib/load-registry";
-import { getServerByName, getSourcePath } from "@/lib/registry-service";
+import {
+  getServerByName,
+  getServerPageData,
+  getSourcePath,
+} from "@/lib/registry-service";
 
 export const revalidate = 60;
 
@@ -18,7 +23,9 @@ type PageProps = {
   params: Promise<{ name: string[] }>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { name } = await params;
   const serverName = name.join("/");
   const entry = await getServerByName(serverName);
@@ -27,25 +34,35 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: "Server not found" };
   }
 
+  const title = entry.server.title ?? entry.server.name;
+  const description = entry.server.description;
+
   return {
-    title: entry.server.title ?? entry.server.name,
-    description: entry.server.description,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
 export default async function ServerDetailPage({ params }: PageProps) {
   const { name } = await params;
   const serverName = name.join("/");
-  const entry = await getServerByName(serverName);
+  const pageData = await getServerPageData(serverName);
 
-  if (!entry) {
+  if (!pageData) {
     notFound();
   }
 
-  const server = entry.server;
-  const officialStatus =
-    entry._meta?.["io.modelcontextprotocol.registry/official"]?.status;
-
+  const server = pageData.entry.server;
   const githubData = server.repository?.url
     ? await fetchGitHubRepoData(server.repository.url)
     : null;
@@ -53,18 +70,9 @@ export default async function ServerDetailPage({ params }: PageProps) {
   return (
     <div>
       <ServerDetailContent
-        server={{
-          name: server.name,
-          title: server.title,
-          description: server.description,
-          version: server.version,
-          websiteUrl: server.websiteUrl,
-          repository: server.repository,
-          icons: server.icons,
-          packages: server.packages,
-          remotes: server.remotes,
-        }}
-        officialStatus={officialStatus}
+        entry={pageData.entry}
+        searchCount={pageData.searchCount}
+        related={pageData.related}
         githubData={githubData}
       />
     </div>
