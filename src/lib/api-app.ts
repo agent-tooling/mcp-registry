@@ -38,7 +38,7 @@ apiApp.use(async (c, next) => {
   const startedAt = performance.now();
   await next();
 
-  await recordApiRequest({
+  const analyticsEvent = {
     path: c.req.path,
     method: c.req.method,
     status: c.res.status,
@@ -51,6 +51,12 @@ apiApp.use(async (c, next) => {
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
       c.req.header("x-real-ip"),
     durationMs: Math.max(0, Math.round(performance.now() - startedAt)),
+  };
+
+  void recordApiRequest(analyticsEvent).catch((error: unknown) => {
+    const message =
+      error instanceof Error ? error.message : "unknown analytics error";
+    console.error("Failed to dispatch API analytics:", message);
   });
 });
 
@@ -86,7 +92,8 @@ apiApp.get(
         name: "search",
         required: false,
         schema: { type: "string" },
-        description: "Case-insensitive match against server name.",
+        description:
+          "Case-insensitive match against server registry metadata and install targets.",
       },
       {
         in: "query",
