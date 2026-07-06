@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GitHubRepoData } from "@/lib/github";
+import { displayServerName, publisherFromNamespace } from "@/lib/publisher";
 import type { RelatedServer, SearchCount } from "@/lib/registry-service";
 import type { ServerEntry } from "@/lib/schema";
 import { searchQueryForServerName } from "@/lib/query-servers";
@@ -115,6 +116,7 @@ export function ServerDetailContent({
   const officialMeta =
     entry._meta?.["io.modelcontextprotocol.registry/official"];
   const namespace = server.name.split("/")[0];
+  const publisher = publisherFromNamespace(namespace);
   const hasRemotes = (server.remotes ?? []).length > 0;
   const hasPackages = (server.packages ?? []).length > 0;
   const packageRegistries = [
@@ -156,10 +158,13 @@ export function ServerDetailContent({
               ) : null}
             </div>
             <div className="flex items-center gap-1">
-              <p className="font-mono text-sm break-all text-muted-foreground">
-                {server.name}
+              <p
+                className="font-mono text-sm break-all text-muted-foreground"
+                title={`Registry ID: ${server.name}`}
+              >
+                {displayServerName(server.name)}
               </p>
-              <CopyButton text={server.name} label="Copy server name" />
+              <CopyButton text={server.name} label="Copy registry ID" />
             </div>
           </div>
         </div>
@@ -232,7 +237,7 @@ export function ServerDetailContent({
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">Details</h2>
             <DetailsCard
-              namespace={namespace}
+              publisher={publisher}
               version={server.version}
               officialMeta={officialMeta}
               hasRemotes={hasRemotes}
@@ -253,9 +258,7 @@ export function ServerDetailContent({
 
       {related.length > 0 && (
         <section className="mt-12 space-y-4">
-          <h2 className="text-lg font-semibold">
-            More from <span className="font-mono text-base">{namespace}</span>
-          </h2>
+          <h2 className="text-lg font-semibold">More from {publisher.label}</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {related.map((item) => (
               <ServerCard
