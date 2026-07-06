@@ -12,6 +12,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Publisher } from "@/lib/publisher";
 
 export type OfficialMeta = {
   status?: string;
@@ -20,7 +21,7 @@ export type OfficialMeta = {
 };
 
 export type DetailsCardProps = {
-  namespace: string;
+  publisher: Publisher;
   version: string;
   officialMeta?: OfficialMeta;
   hasRemotes: boolean;
@@ -62,7 +63,7 @@ function DetailRow({
 }
 
 export function DetailsCard({
-  namespace,
+  publisher,
   version,
   officialMeta,
   hasRemotes,
@@ -82,9 +83,18 @@ export function DetailsCard({
       <CardContent>
         <dl className="space-y-2.5">
           <DetailRow icon={<UserIcon className="size-3.5" />} label="Publisher">
-            <span className="block truncate font-mono text-xs">
-              {namespace}
-            </span>
+            {publisher.url ? (
+              <a
+                href={publisher.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block truncate underline-offset-4 hover:underline"
+              >
+                {publisher.label}
+              </a>
+            ) : (
+              <span className="block truncate">{publisher.label}</span>
+            )}
           </DetailRow>
 
           <DetailRow icon={<TagIcon className="size-3.5" />} label="Version">
