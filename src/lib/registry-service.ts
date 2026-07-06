@@ -56,6 +56,72 @@ export async function getServerByName(
   return entries.find((entry) => entry.server.name === name);
 }
 
+export type SearchCount = {
+  allTime: number;
+  thisWeek: number;
+  /** Daily counts (oldest first) over the analytics daily window. */
+  daily?: number[];
+};
+
+export type RelatedServer = {
+  entry: ServerEntry;
+  searchCount?: SearchCount;
+};
+
+export type ServerPageData = {
+  entry: ServerEntry;
+  searchCount?: SearchCount;
+  related: RelatedServer[];
+};
+
+const RELATED_LIMIT = 4;
+
+export async function getServerPageData(
+  name: string,
+): Promise<ServerPageData | undefined> {
+  const entries = await loadRegistryCached();
+  const entry = entries.find((e) => e.server.name === name);
+  if (!entry) {
+    return undefined;
+  }
+
+  const popularity = await getPopularityScores(entries);
+  const namespace = name.split("/")[0];
+
+  const related = entries
+    .filter(
+      (e) =>
+        e.server.name !== name && e.server.name.split("/")[0] === namespace,
+    )
+    .sort((a, b) => {
+      const scoreA = popularity?.get(a.server.name)?.allTime ?? 0;
+      const scoreB = popularity?.get(b.server.name)?.allTime ?? 0;
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA;
+      }
+      const labelA = a.server.title ?? a.server.name;
+      const labelB = b.server.title ?? b.server.name;
+      return labelA.localeCompare(labelB);
+    })
+    .slice(0, RELATED_LIMIT)
+    .map((e) => {
+      const score = popularity?.get(e.server.name);
+      return {
+        entry: e,
+        // Cards don't render daily series; keep the RSC payload lean.
+        searchCount: score
+          ? { allTime: score.allTime, thisWeek: score.thisWeek }
+          : undefined,
+      };
+    });
+
+  return {
+    entry,
+    searchCount: popularity?.get(name),
+    related,
+  };
+}
+
 export async function getRegistryOverview(): Promise<RegistryOverview> {
   const [entries, searchStats] = await Promise.all([
     loadRegistryCached(),
@@ -118,7 +184,11 @@ export async function listServersByPage(input: {
     for (const entry of result.servers) {
       const score = popularity.get(entry.server.name);
       if (score) {
-        searchCounts[entry.server.name] = score;
+        // Cards don't render daily series; keep the RSC payload lean.
+        searchCounts[entry.server.name] = {
+          allTime: score.allTime,
+          thisWeek: score.thisWeek,
+        };
       }
     }
   }

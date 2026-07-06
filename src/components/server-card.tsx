@@ -4,6 +4,7 @@ import { GlobeIcon, TerminalIcon, TrendingUpIcon } from "lucide-react";
 import { ServerIcon } from "@/components/server-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { displayServerName } from "@/lib/publisher";
 import type { ServerEntry } from "@/lib/schema";
 
 type SearchCount = {
@@ -51,8 +52,11 @@ export function ServerCard({ entry, searchCount }: ServerCardProps) {
                   </Badge>
                 ) : null}
               </div>
-              <p className="truncate font-mono text-xs text-muted-foreground">
-                {server.name}
+              <p
+                className="truncate font-mono text-xs text-muted-foreground"
+                title={server.name}
+              >
+                {displayServerName(server.name)}
               </p>
             </div>
           </div>

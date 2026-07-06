@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { queryServers } from "../src/lib/query-servers";
+import {
+  queryServers,
+  searchQueryForServerName,
+} from "../src/lib/query-servers";
 import type { ServerEntry } from "../src/lib/schema";
 
 function entry(server: ServerEntry["server"]): ServerEntry {
@@ -115,6 +118,42 @@ describe("queryServers", () => {
     expect(result.servers.map((item) => item.server.name).sort()).toEqual([
       "io.github.github/github-mcp-server",
       "io.github.someone/github-helper",
+    ]);
+  });
+});
+
+describe("searchQueryForServerName", () => {
+  it("keeps regular namespaces intact", () => {
+    expect(searchQueryForServerName("com.neon/mcp")).toBe("com.neon/mcp");
+  });
+
+  it("strips hosted-provider prefixes that are excluded from search text", () => {
+    expect(searchQueryForServerName("io.github.github/github-mcp-server")).toBe(
+      "github/github-mcp-server",
+    );
+  });
+
+  it("resolves the exact server through queryServers", () => {
+    const entries: ServerEntry[] = [
+      entry({
+        name: "io.github.example/filesystem",
+        description: "Filesystem MCP server.",
+        version: "1.0.0",
+      }),
+      entry({
+        name: "io.github.example/weather",
+        description: "Weather MCP server.",
+        version: "1.0.0",
+      }),
+    ];
+
+    const result = queryServers(entries, {
+      search: searchQueryForServerName("io.github.example/weather"),
+      limit: "10",
+    });
+
+    expect(result.servers.map((item) => item.server.name)).toEqual([
+      "io.github.example/weather",
     ]);
   });
 });
