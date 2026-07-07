@@ -1,3 +1,5 @@
+import { withBasePath } from "./base-path";
+
 export type SiteConfig = {
   /** Display name of this registry, e.g. "add-mcp registry". */
   name: string;
@@ -5,6 +7,8 @@ export type SiteConfig = {
   description: string;
   /** Optional link to the source or data repository behind this registry. */
   repositoryUrl?: string;
+  /** Image URL for the header logo. Defaults to the bundled mark. */
+  logoUrl: string;
 };
 
 const DEFAULT_NAME = "MCP Registry";
@@ -20,5 +24,6 @@ export function getSiteConfig(): SiteConfig {
     name: readEnv("SITE_NAME") ?? DEFAULT_NAME,
     description: readEnv("SITE_DESCRIPTION") ?? DEFAULT_DESCRIPTION,
     repositoryUrl: readEnv("SITE_REPOSITORY_URL"),
+    logoUrl: readEnv("SITE_LOGO_URL") ?? withBasePath("/logo.svg"),
   };
 }

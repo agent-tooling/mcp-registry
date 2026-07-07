@@ -32,9 +32,10 @@ Customize the registry name and description shown in the UI and page metadata:
 SITE_NAME=add-mcp registry
 SITE_DESCRIPTION=Registry for the add-mcp CLI, serving a cached version of the integrations.sh MCP servers.
 SITE_REPOSITORY_URL=https://github.com/neon-solutions/add-mcp
+SITE_LOGO_URL=https://example.com/logo.svg
 ```
 
-All three are optional. `SITE_REPOSITORY_URL` adds a GitHub link to the header and footer.
+All four are optional. `SITE_REPOSITORY_URL` adds a GitHub link to the header and footer. `SITE_LOGO_URL` replaces the header logo (absolute URL or root-relative path); it defaults to the bundled `/logo.svg` mark.
 
 ### Base path
 
