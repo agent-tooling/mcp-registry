@@ -9,8 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { withBasePath } from "@/lib/base-path";
 
-const OPENAPI_URL = "/api/openapi.json";
+const OPENAPI_URL = withBasePath("/api/openapi.json");
 
 export function OpenApiMenu() {
   async function handleCopyContent() {

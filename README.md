@@ -32,9 +32,20 @@ Customize the registry name and description shown in the UI and page metadata:
 SITE_NAME=add-mcp registry
 SITE_DESCRIPTION=Registry for the add-mcp CLI, serving a cached version of the integrations.sh MCP servers.
 SITE_REPOSITORY_URL=https://github.com/neon-solutions/add-mcp
+SITE_LOGO_URL=https://example.com/logo.svg
 ```
 
-All three are optional. `SITE_REPOSITORY_URL` adds a GitHub link to the header and footer.
+All four are optional. `SITE_REPOSITORY_URL` adds a GitHub link to the header and footer. `SITE_LOGO_URL` replaces the header logo (absolute URL or root-relative path); it defaults to the bundled `/logo.svg` mark.
+
+### Base path
+
+To serve the registry under a sub-path (e.g. `example.com/registry` behind a proxy), set:
+
+```env
+NEXT_PUBLIC_BASE_PATH=/registry
+```
+
+All pages, assets, and API routes then live under the base path (`/registry`, `/registry/api/v1/servers`, ...). For backwards compatibility, old root-relative URLs (`/`, `/servers/...`, `/api/v1/servers`, ...) keep working on the deployment's own domain via internal rewrites — no redirects, so existing API clients are unaffected. Leave unset (default) to serve from the domain root.
 
 Other scripts:
 

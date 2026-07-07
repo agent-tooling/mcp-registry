@@ -23,12 +23,13 @@ export function SiteHeader() {
           href="/"
           className="flex min-w-0 items-center gap-2.5 font-semibold tracking-tight"
         >
-          <span
+          {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, no optimization needed */}
+          <img
+            src={site.logoUrl}
+            alt=""
             aria-hidden
-            className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-xs font-bold text-primary-foreground"
-          >
-            {"/"}
-          </span>
+            className="size-6 shrink-0 rounded-md"
+          />
           <span className="truncate text-sm md:text-base">{site.name}</span>
         </Link>
 

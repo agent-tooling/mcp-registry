@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { getPopularityScores } from "./analytics/popularity";
 import { recordApiRequest } from "./analytics/postgres";
+import { basePath, stripBasePath } from "./base-path";
 import { loadRegistryFromFile } from "./load-registry";
 import { queryServers } from "./query-servers";
 import { listResponseSchema, type ServerEntry } from "./schema";
@@ -34,6 +35,8 @@ async function getRegistryEntries(): Promise<ServerEntry[]> {
   return entriesPromise;
 }
 
+// Next strips the configured basePath before invoking route handlers, so the
+// Hono app always mounts at /api regardless of NEXT_PUBLIC_BASE_PATH.
 export const apiApp = new Hono().basePath("/api");
 
 apiApp.use(async (c, next) => {
@@ -41,7 +44,9 @@ apiApp.use(async (c, next) => {
   await next();
 
   const analyticsEvent = {
-    path: c.req.path,
+    // Recorded without the base path so analytics rows and dashboards stay
+    // consistent no matter where the registry is mounted.
+    path: stripBasePath(c.req.path),
     method: c.req.method,
     status: c.res.status,
     search: c.req.query("search"),
