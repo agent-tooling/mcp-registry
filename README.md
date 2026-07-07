@@ -36,6 +36,16 @@ SITE_REPOSITORY_URL=https://github.com/neon-solutions/add-mcp
 
 All three are optional. `SITE_REPOSITORY_URL` adds a GitHub link to the header and footer.
 
+### Base path
+
+To serve the registry under a sub-path (e.g. `example.com/registry` behind a proxy), set:
+
+```env
+NEXT_PUBLIC_BASE_PATH=/registry
+```
+
+All pages, assets, and API routes then live under the base path (`/registry`, `/registry/api/v1/servers`, ...). For backwards compatibility, old root-relative URLs (`/`, `/servers/...`, `/api/v1/servers`, ...) keep working on the deployment's own domain via internal rewrites — no redirects, so existing API clients are unaffected. Leave unset (default) to serve from the domain root.
+
 Other scripts:
 
 ```bash

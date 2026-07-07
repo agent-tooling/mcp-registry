@@ -1,3 +1,4 @@
+import { withBasePath } from "@/lib/base-path";
 import { getSiteConfig } from "@/lib/site-config";
 
 const PROJECT_URL = "https://github.com/agent-tooling/mcp-registry";
@@ -22,7 +23,7 @@ export function SiteFooter() {
         </p>
         <nav className="flex items-center gap-4">
           <a
-            href="/api/openapi.json"
+            href={withBasePath("/api/openapi.json")}
             target="_blank"
             rel="noreferrer"
             className="hover:text-foreground"

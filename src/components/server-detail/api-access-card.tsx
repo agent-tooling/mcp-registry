@@ -5,6 +5,7 @@ import { CodeIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { Card, CardContent } from "@/components/ui/card";
+import { withBasePath } from "@/lib/base-path";
 
 type ApiAccessCardProps = {
   /** Search query that resolves this server through the API. */
@@ -19,7 +20,7 @@ export function ApiAccessCard({ searchQuery }: ApiAccessCardProps) {
     setOrigin(window.location.origin);
   }, []);
 
-  const url = `${origin}/api/v1/servers?search=${encodeURIComponent(searchQuery)}`;
+  const url = `${origin}${withBasePath("/api/v1/servers")}?search=${encodeURIComponent(searchQuery)}`;
   const command = `curl "${url}"`;
 
   return (
@@ -32,7 +33,7 @@ export function ApiAccessCard({ searchQuery }: ApiAccessCardProps) {
         <p className="text-sm text-muted-foreground">
           Fetch this server&apos;s registry entry as JSON. See the{" "}
           <a
-            href="/api/openapi.json"
+            href={withBasePath("/api/openapi.json")}
             target="_blank"
             rel="noreferrer"
             className="underline underline-offset-4 hover:text-foreground"
