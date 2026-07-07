@@ -13,6 +13,23 @@ function GitHubMark({ className }: { className?: string }) {
   );
 }
 
+// Monochrome tile + slash drawn with theme colors, so the default mark stays
+// black-and-white in light mode and inverts in dark mode.
+function DefaultLogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden className={className}>
+      <rect width="64" height="64" rx="14" className="fill-foreground" />
+      <path
+        d="M25 46 39 18"
+        fill="none"
+        strokeWidth="7"
+        strokeLinecap="round"
+        className="stroke-background"
+      />
+    </svg>
+  );
+}
+
 export function SiteHeader() {
   const site = getSiteConfig();
 
@@ -23,13 +40,17 @@ export function SiteHeader() {
           href="/"
           className="flex min-w-0 items-center gap-2.5 font-semibold tracking-tight"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset, no optimization needed */}
-          <img
-            src={site.logoUrl}
-            alt=""
-            aria-hidden
-            className="size-6 shrink-0 rounded-md"
-          />
+          {site.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- static brand asset, no optimization needed
+            <img
+              src={site.logoUrl}
+              alt=""
+              aria-hidden
+              className="size-6 shrink-0 rounded-md"
+            />
+          ) : (
+            <DefaultLogoMark className="size-6 shrink-0" />
+          )}
           <span className="truncate text-sm md:text-base">{site.name}</span>
         </Link>
 
