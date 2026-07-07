@@ -21,7 +21,7 @@ describe("getSiteConfig", () => {
       name: "MCP Registry",
       description: "Browse and discover MCP servers.",
       repositoryUrl: undefined,
-      logoUrl: "/logo.svg",
+      logoUrl: null,
     });
   });
 
@@ -43,6 +43,6 @@ describe("getSiteConfig", () => {
   it("treats empty strings as unset", () => {
     process.env.SITE_NAME = "  ";
     expect(getSiteConfig().name).toBe("MCP Registry");
-    expect(getSiteConfig().logoUrl).toBe("/logo.svg");
+    expect(getSiteConfig().logoUrl).toBeNull();
   });
 });
